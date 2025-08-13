@@ -1,44 +1,32 @@
 # Java Bank Management System
 
-A simple bank management system built with Java, Swing GUI, and MySQL.  
-Features include account creation, deposit, withdrawal, and balance inquiry, with all data stored securely in a MySQL database.
+A desktop application for managing bank accounts, built with Java Swing and MySQL.
 
 ## Features
-- Create new bank accounts
-- Deposit and withdraw money
-- View account balances
-- Data stored in MySQL
-- User-friendly Java Swing GUI
-- Rupee (₹) currency support
+- **Bank Administration:** Create new accounts with name, phone, email, city, and initial deposit.
+- **Transactions:** Deposit and withdraw money from accounts.
+- **Transfer Money:** Transfer funds between accounts with validation.
+- **Delete Account:** Remove accounts securely, with result feedback.
+- **View Accounts:** Display all accounts and details.
+- **Modern UI:** Clean, sectioned interface with clear, readable input fields and buttons.
 
-## Requirements
-- Java JDK 8 or higher
-- MySQL Server
-- MySQL Connector/J (JAR file in `lib/` folder)
+## Tech Stack
+- Java (Swing GUI)
+- MySQL (JDBC integration)
+- MVC architecture
 
-## Setup
-1. Clone the repository.
-2. Place `mysql-connector-j-9.4.0.jar` in the `lib` folder.
-3. Update MySQL credentials in `src/DatabaseManager.java` if needed.
-4. Compile:
+## How to Run
+1. Compile the source files:
    ```
-   javac -cp ".;lib/mysql-connector-j-9.4.0.jar" src/*.java
+   javac -cp "lib/mysql-connector-j-9.4.0.jar" src/*.java
    ```
-5. Run:
+2. Run the application:
    ```
    java -cp "src;lib/mysql-connector-j-9.4.0.jar" BankGUI
    ```
 
-## Project Structure
-```
-Java project/
-├── lib/
-│   └── mysql-connector-j-9.4.0.jar
-├── src/
-│   ├── BankAccount.java
-│   ├── BankService.java
-│   ├── DatabaseManager.java
-│   └── BankGUI.java
+---
+Ideal for learning Java desktop development, database integration, and GUI design.
 ├── README.md
 ```
 
