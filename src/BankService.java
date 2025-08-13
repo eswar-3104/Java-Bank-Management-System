@@ -23,6 +23,12 @@ public class BankService {
     
     // Create new account
     public String createAccount(String accountHolderName, double initialDeposit) {
+        return createAccount(accountHolderName, initialDeposit, "", "", "");
+    }
+    
+    // Create new account with all details
+    public String createAccount(String accountHolderName, double initialDeposit, 
+                               String phoneNumber, String email, String city) {
         if (accountHolderName == null || accountHolderName.trim().isEmpty()) {
             return null; // Invalid name
         }
@@ -32,7 +38,8 @@ public class BankService {
         }
         
         String accountNumber = generateAccountNumber();
-        BankAccount newAccount = new BankAccount(accountNumber, accountHolderName.trim(), initialDeposit);
+        BankAccount newAccount = new BankAccount(accountNumber, accountHolderName.trim(), 
+                                               initialDeposit, phoneNumber, email, city);
         
         if (dbManager.createAccount(newAccount)) {
             return accountNumber;
@@ -90,6 +97,44 @@ public class BankService {
     // Check if account exists
     public boolean accountExists(String accountNumber) {
         return dbManager.accountExists(accountNumber);
+    }
+    
+    // Delete account
+    public boolean deleteAccount(String accountNumber) {
+        BankAccount account = dbManager.getAccount(accountNumber);
+        if (account != null) {
+            return dbManager.deleteAccount(accountNumber);
+        }
+        return false;
+    }
+    
+    // Transfer money between accounts
+    public boolean transferMoney(String fromAccountNumber, String toAccountNumber, double amount) {
+        if (amount <= 0) {
+            return false;
+        }
+        
+        if (fromAccountNumber.equals(toAccountNumber)) {
+            return false; // Cannot transfer to same account
+        }
+        
+        BankAccount fromAccount = dbManager.getAccount(fromAccountNumber);
+        BankAccount toAccount = dbManager.getAccount(toAccountNumber);
+        
+        if (fromAccount != null && toAccount != null && fromAccount.hasSufficientBalance(amount)) {
+            // Withdraw from source account
+            fromAccount.withdraw(amount);
+            // Deposit to destination account
+            toAccount.deposit(amount);
+            
+            // Update both accounts in database
+            boolean updateFrom = dbManager.updateBalance(fromAccountNumber, fromAccount.getBalance());
+            boolean updateTo = dbManager.updateBalance(toAccountNumber, toAccount.getBalance());
+            
+            return updateFrom && updateTo;
+        }
+        
+        return false;
     }
     
     // Close service (cleanup)

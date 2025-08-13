@@ -24,10 +24,31 @@ public class DatabaseManager {
             String createTableSQL = "CREATE TABLE IF NOT EXISTS accounts ("
                 + "account_number VARCHAR(20) PRIMARY KEY,"
                 + "account_holder_name VARCHAR(100),"
+                + "phone_number VARCHAR(20),"
+                + "email VARCHAR(100),"
+                + "city VARCHAR(50),"
                 + "balance DOUBLE)";
             
             Statement statement = connection.createStatement();
             statement.execute(createTableSQL);
+            
+            // Add new columns if they don't exist (for existing databases)
+            try {
+                statement.execute("ALTER TABLE accounts ADD COLUMN phone_number VARCHAR(20) DEFAULT ''");
+            } catch (SQLException e) {
+                // Column might already exist, ignore
+            }
+            try {
+                statement.execute("ALTER TABLE accounts ADD COLUMN email VARCHAR(100) DEFAULT ''");
+            } catch (SQLException e) {
+                // Column might already exist, ignore
+            }
+            try {
+                statement.execute("ALTER TABLE accounts ADD COLUMN city VARCHAR(50) DEFAULT ''");
+            } catch (SQLException e) {
+                // Column might already exist, ignore
+            }
+            
             statement.close();
             
             System.out.println("Database initialized successfully!");
@@ -41,12 +62,15 @@ public class DatabaseManager {
     
     // Create a new account
     public boolean createAccount(BankAccount account) {
-        String insertSQL = "INSERT INTO accounts (account_number, account_holder_name, balance) VALUES (?, ?, ?)";
+        String insertSQL = "INSERT INTO accounts (account_number, account_holder_name, phone_number, email, city, balance) VALUES (?, ?, ?, ?, ?, ?)";
         
         try (PreparedStatement pstmt = connection.prepareStatement(insertSQL)) {
             pstmt.setString(1, account.getAccountNumber());
             pstmt.setString(2, account.getAccountHolderName());
-            pstmt.setDouble(3, account.getBalance());
+            pstmt.setString(3, account.getPhoneNumber());
+            pstmt.setString(4, account.getEmail());
+            pstmt.setString(5, account.getCity());
+            pstmt.setDouble(6, account.getBalance());
             
             int rowsAffected = pstmt.executeUpdate();
             return rowsAffected > 0;
@@ -69,7 +93,10 @@ public class DatabaseManager {
                 return new BankAccount(
                     rs.getString("account_number"),
                     rs.getString("account_holder_name"),
-                    rs.getDouble("balance")
+                    rs.getDouble("balance"),
+                    rs.getString("phone_number"),
+                    rs.getString("email"),
+                    rs.getString("city")
                 );
             }
             
@@ -109,7 +136,10 @@ public class DatabaseManager {
                 BankAccount account = new BankAccount(
                     rs.getString("account_number"),
                     rs.getString("account_holder_name"),
-                    rs.getDouble("balance")
+                    rs.getDouble("balance"),
+                    rs.getString("phone_number"),
+                    rs.getString("email"),
+                    rs.getString("city")
                 );
                 accounts.add(account);
             }
@@ -138,6 +168,22 @@ public class DatabaseManager {
         }
         
         return false;
+    }
+    
+    // Delete account
+    public boolean deleteAccount(String accountNumber) {
+        String deleteSQL = "DELETE FROM accounts WHERE account_number = ?";
+        
+        try (PreparedStatement pstmt = connection.prepareStatement(deleteSQL)) {
+            pstmt.setString(1, accountNumber);
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+            
+        } catch (SQLException e) {
+            System.err.println("Error deleting account: " + e.getMessage());
+            return false;
+        }
     }
     
     // Close database connection
